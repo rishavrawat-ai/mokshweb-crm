@@ -1,0 +1,400 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      String   @default("SALES") // SUPER_ADMIN, ADMIN, SALES, FINANCE, OPERATIONS
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads     Lead[]    @relation("LeadAssignee")
+  salesLeads    Lead[]    @relation("LeadSalesUser")
+  financeLeads  Lead[]    @relation("LeadFinanceUser")
+  opsLeads      Lead[]    @relation("LeadOpsUser")
+  leadLogs      LeadLog[]
+  
+  projects  Project[]
+  reminders Reminder[]
+  opsTasks  OpsTask[]
+  
+  discountRequests DiscountRequest[] @relation("SalesUserDiscounts")
+  approvedDiscounts DiscountRequest[] @relation("AdminApprovals")
+}
+
+
+
+model Lead {
+  id              Int       @id @default(autoincrement())
+  customerName    String
+  phone           String
+  email           String?
+  source          String?
+  status          String    @default("NEW") // Enum: NEW, FOLLOW_UP, INTERESTED, IN_PROGRESS, DEAL_CLOSED, LOST, HANDOFF_TO_OPS, UNDER_PRINTING, UNDER_INSTALLATION, CLOSED, PROCESSING
+  notes           String?
+  
+  // Ops workflow fields
+  opsStatus       String?   // UNDER_PRINTING, UNDER_INSTALLATION, CLOSED
+  opsRemarks      String?   // Ops-specific remarks
+  printingNotes   String?   // Notes for printing
+  installationNotes String? // Notes for installation
+  
+  // Current Assignee (can be Sales, Finance, or Ops rep)
+  assigneeId      Int?
+  assignee        User?     @relation("LeadAssignee", fields: [assigneeId], references: [id])
+
+  // Track specific owners for stages
+  salesUserId     Int?      // The original sales rep
+  salesUser       User?     @relation("LeadSalesUser", fields: [salesUserId], references: [id])
+  
+  financeUserId   Int?      // The finance person handling it
+  financeUser     User?     @relation("LeadFinanceUser", fields: [financeUserId], references: [id])
+
+  opsUserId       Int?      // The ops person handling it
+  opsUser         User?     @relation("LeadOpsUser", fields: [opsUserId], references: [id])
+
+  logs            LeadLog[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Pricing fields for Discount Workflow
+  baseTotal              Decimal   @default(0)
+  discountPercentApplied Int?
+  discountAmount         Decimal?
+  finalTotal             Decimal?
+  pricingBreakdown       String?   // JSON string
+  
+  // Relations
+  discountRequests DiscountRequest[]
+  campaignItems    LeadCampaignItem[]
+  payment          LeadPayment?
+}
+
+model LeadLog {
+  id        Int      @id @default(autoincrement())
+  leadId    Int
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // STATUS_CHANGE, NOTE, ASSIGNMENT
+  details   String
+  createdAt DateTime @default(now())
+}
+
+model Customer {
+  id        Int       @id @default(autoincrement())
+  name      String
+  phone     String
+  email     String?
+  company   String?
+  address   String?
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Project {
+  id              Int           @id @default(autoincrement())
+  title           String
+  customerId      Int
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  status          String        @default("DRAFT")
+  discountPct     Float?        // Added for Float requirement
+  discountPercent Decimal?
+  couponCode      String?
+  remarks         String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  invoices    Invoice[]
+  reminders   Reminder[]
+  opsTasks    OpsTask[]
+  salesUserId Int? // Linking to the sales person who created it
+  salesUser   User? @relation(fields: [salesUserId], references: [id])
+
+  // Discount Approval Fields
+  discountApprovedRequestId String?
+  discountApprovedAt        DateTime?
+  // discountRequests       DiscountRequest[] // Removed in favor of Lead discount requests
+}
+
+model Invoice {
+  id            Int           @id @default(autoincrement())
+  projectId     Int
+  project       Project       @relation(fields: [projectId], references: [id])
+  invoiceNumber String        @unique
+  amount        Decimal
+  currency      String        @default("INR")
+  status        String        @default("PENDING")
+  dueDate       DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+// Comprehensive Payment Module for Reminder System
+model LeadPayment {
+  id                      Int       @id @default(autoincrement())
+  leadId                  Int       @unique
+  lead                    Lead      @relation(fields: [leadId], references: [id])
+  
+  // Payment Status: NOT_RAISED, PENDING, PARTIAL, OVERDUE, PROMISED, BROKEN_PROMISE, PAID, CANCELLED
+  status                  String    @default("NOT_RAISED")
+  
+  // Invoice & Amounts
+  invoiceNo               String?
+  totalAmount             Decimal   @default(0)
+  paidAmount              Decimal   @default(0)
+  pendingAmount           Decimal   @default(0)
+  
+  // Dates
+  dueDate                 DateTime?
+  clientCommitmentDate    DateTime? // When client promises to pay
+  commitmentChannel       String?   // VERBAL, WHATSAPP, EMAIL, OTHER
+  commitmentNote          String?   // Required when setting promise
+  
+  // Follow-up tracking
+  lastFollowupAt          DateTime?
+  lastFollowupNote        String?
+  nextReminderAt          DateTime?
+  
+  // Control
+  stopReminders           Boolean   @default(false)
+  
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  
+  // Relations
+  transactions            PaymentTransaction[]
+  reminderLogs            PaymentReminderLog[]
+  followupNotes           PaymentFollowupNote[]
+}
+
+model PaymentTransaction {
+  id                Int           @id @default(autoincrement())
+  leadPaymentId     Int
+  leadPayment       LeadPayment   @relation(fields: [leadPaymentId], references: [id])
+  
+  amount            Decimal
+  mode              String        // UPI, BANK, CASH, CHEQUE, OTHER
+  transactionRef    String?
+  proofUrl          String?       // Upload proof
+  notes             String?
+  
+  paidAt            DateTime      @default(now())
+  createdAt         DateTime      @default(now())
+}
+
+model PaymentFollowupNote {
+  id                Int           @id @default(autoincrement())
+  leadPaymentId     Int
+  leadPayment       LeadPayment   @relation(fields: [leadPaymentId], references: [id])
+  
+  note              String
+  createdBy         Int
+  createdAt         DateTime      @default(now())
+}
+
+model PaymentReminderLog {
+  id                Int           @id @default(autoincrement())
+  leadPaymentId     Int
+  leadPayment       LeadPayment   @relation(fields: [leadPaymentId], references: [id])
+  
+  recipientType     String        // CLIENT, SALES, FINANCE, ESCALATION
+  recipientEmail    String?
+  recipientPhone    String?
+  
+  channel           String        // EMAIL, SMS, WHATSAPP
+  status            String        // SENT, FAILED, DELIVERED
+  errorMessage      String?
+  
+  sentAt            DateTime      @default(now())
+}
+
+model Reminder {
+  id             Int      @id @default(autoincrement())
+  projectId      Int?
+  project        Project? @relation(fields: [projectId], references: [id])
+  assignedUserId Int
+  assignedUser   User     @relation(fields: [assignedUserId], references: [id])
+  remindAt       DateTime
+  channel        String // email / whatsapp / sms
+  status         String   @default("PENDING") // PENDING, SENT, CANCELLED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model OpsTask {
+  id          Int      @id @default(autoincrement())
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id])
+  stage       String   @default("RECEIVED")
+  details     String?
+  updatedBy   Int?
+  updater     User?    @relation(fields: [updatedBy], references: [id])
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model InventoryHoarding {
+  id                  Int      @id @default(autoincrement())
+  
+  // Source tracking
+  sourceSrNo          Int?     // Sr no. from import file
+  
+  // Outlet/Location details
+  outletName          String   // Name of the Outlet
+  locationName        String   // Location
+  state               String   // State
+  district            String   // District
+  city                String?  // City (for backward compatibility)
+  areaType            String?  // URBAN, HIGHWAY, RURAL
+  
+  // Dimensions
+  widthFt             Decimal? // Width in ft
+  heightFt            Decimal? // Height in ft
+  areaSqft            Decimal? // Total Area in Sq Ft (computed or provided)
+  
+  // Pricing
+  ratePerSqft         Decimal? // Rates (per sqft)
+  installationCharge  Decimal? // Installation Charge
+  printingCharge      Decimal? // Printing Charge
+  netTotal            Decimal? // Net Total (computed or provided)
+  
+  // Computed values for validation
+  computedArea        Decimal? // System-calculated area
+  computedBaseCost    Decimal? // System-calculated base cost
+  computedNetTotal    Decimal? // System-calculated net total
+  
+  // Audit/Debug
+  rawImportData       String?  // JSON of original row data
+  importBatchId       String?  // Track which import batch this came from
+  
+  // Legacy fields (for backward compatibility)
+  location            String?  // Old location field
+  name                String?  // Old name field
+  hoardingsCount      Int      @default(1)
+  width               Decimal? // Old width field
+  height              Decimal? // Old height field
+  totalArea           Decimal? // Old totalArea field
+  rate                Decimal? // Old rate field
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  leadItems           LeadCampaignItem[]
+  
+  @@index([state, district])
+  @@index([outletName])
+  @@index([importBatchId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model LeadCampaignItem {
+  id                  Int               @id @default(autoincrement())
+  leadId              Int
+  lead                Lead              @relation(fields: [leadId], references: [id])
+  inventoryHoardingId Int
+  inventoryHoarding   InventoryHoarding @relation(fields: [inventoryHoardingId], references: [id])
+  
+  // Snapshot of price at time of addition
+  rate           Decimal
+  printingCharge Decimal?
+  total          Decimal
+  
+  startDate      DateTime?
+  endDate        DateTime?
+  
+  createdAt      DateTime @default(now())
+}
+
+// Updated DiscountRequest for Lead workflow
+model DiscountRequest {
+  id                  String    @id @default(cuid())
+  
+  // Relation to Lead
+  leadId              Int
+  lead                Lead      @relation(fields: [leadId], references: [id])
+  
+  // Percentages
+  requestedPercent    Int
+  approvedPercent     Int?
+  
+  reason              String
+  rejectionReason     String?
+  
+  status              String    @default("PENDING") // PENDING, UNDER_REVIEW, OTP_SENT, APPROVED, REJECTED, CODE_GENERATED, APPLIED, EXPIRED, CANCELLED
+  
+  // User Relations
+  requestedByUserId   Int
+  requestedByUser     User      @relation("SalesUserDiscounts", fields: [requestedByUserId], references: [id])
+  
+  approvedByAdminId   Int?
+  approvedByAdmin     User?     @relation("AdminApprovals", fields: [approvedByAdminId], references: [id])
+  
+  // Timestamps
+  requestedAt         DateTime  @default(now())
+  approvedAt          DateTime?
+  appliedAt           DateTime?
+  
+  // One-to-one relation with code
+  discountCode        DiscountCode?
+
+  // Magic Link & OTP Fields for Super Admin Flow
+  tokenHash           String?   // For the secure email link
+  tokenExpiresAt      DateTime?
+  
+  otpHash             String?   // 6-digit OTP
+  otpExpiresAt        DateTime?
+  otpAttempts         Int       @default(0)
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model DiscountCode {
+  id                String          @id @default(cuid())
+  discountRequestId String          @unique
+  discountRequest   DiscountRequest @relation(fields: [discountRequestId], references: [id])
+  
+  codeHash          String
+  expiresAt         DateTime
+  usedAt            DateTime?
+  
+  attemptsCount     Int             @default(0)
+  lastAttemptAt     DateTime?
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId Int?
+  action      String
+  entityType  String
+  entityId    String
+  metaJson    String   @default("{}")
+  createdAt   DateTime @default(now())
+}
+
+

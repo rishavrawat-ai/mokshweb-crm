@@ -1,0 +1,11 @@
+State,City,Location,District,Name,Hoardings Count,Width,Height,Rate,Printing Charge
+Maharashtra,Mumbai,Andheri West,Mumbai Suburban,Andheri Station Hoarding,1,20,10,15000,5000
+Maharashtra,Mumbai,Bandra East,Mumbai Suburban,Bandra Reclamation,1,15,8,12000,4000
+Maharashtra,Pune,Shivaji Nagar,Pune,FC Road Junction,1,18,9,10000,3500
+Gujarat,Ahmedabad,Satellite,Ahmedabad,SG Highway,2,25,12,20000,6000
+Karnataka,Bangalore,Koramangala,Bangalore Urban,100 Feet Road,1,20,10,18000,5500
+Delhi,New Delhi,Connaught Place,Central Delhi,CP Inner Circle,1,30,15,25000,8000
+Tamil Nadu,Chennai,T Nagar,Chennai,Pondy Bazaar,1,15,8,14000,4500
+West Bengal,Kolkata,Park Street,Kolkata,Park Street Metro,1,20,10,16000,5000
+Rajasthan,Jaipur,MI Road,Jaipur,Statue Circle,1,18,9,11000,3800
+Telangana,Hyderabad,Banjara Hills,Hyderabad,Road No 12,1,22,11,17000,5200

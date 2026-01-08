@@ -1,0 +1,231 @@
+"use client";
+
+import Link from "next/link";
+import { ChevronDown, ArrowUpRight, ShoppingCart, User, LogOut, Menu, X } from "lucide-react";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useCart } from "@/context/CartContext";
+import { useSession, signOut } from "next-auth/react";
+import { useState, useEffect } from "react";
+
+export default function Navbar() {
+    const pathname = usePathname();
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    const isActive = (path: string) => {
+        if (path === "/") {
+            return pathname === "/";
+        }
+        return pathname?.startsWith(path);
+    };
+
+    const navLinks = [
+        { name: "HOME", path: "/" },
+        { name: "PETROLPUMP MEDIA", path: "/petrolpump-media" },
+        { name: "SERVICES", path: "/services" }, // Updated path
+        { name: "CASE STUDY", path: "/case-study" },
+        { name: "BLOG", path: "/blog" },
+    ];
+
+    return (
+        <nav
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 ${scrolled
+                    ? "bg-[#002147]/90 backdrop-blur-md shadow-md py-2"
+                    : "bg-[#002147] py-4"
+                }`}
+        >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-16">
+                    {/* Left: Logo */}
+                    <div className="flex-shrink-0 flex items-center gap-3">
+                        <Link href="/">
+                            <div className="bg-white p-2 rounded-sm transition-transform hover:scale-105">
+                                <Image
+                                    src="/images/logo.png"
+                                    alt="Moksh Promotion Limited"
+                                    width={140}
+                                    height={45}
+                                    className="h-8 w-auto object-contain"
+                                    priority
+                                />
+                            </div>
+                        </Link>
+                    </div>
+
+                    {/* Desktop Menu */}
+                    <div className="hidden md:flex items-center space-x-8">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.name}
+                                href={link.path}
+                                className={`text-sm font-medium transition-colors hover:text-blue-300 ${isActive(link.path) ? "text-white font-bold" : "text-gray-300"
+                                    }`}
+                            >
+                                {link.name}
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* Right: Actions */}
+                    <div className="hidden md:flex items-center gap-6">
+                        <CartIcon />
+                        <UserMenu />
+                        <Link
+                            href="/contact"
+                            className="group flex items-center gap-2 border border-white/30 px-5 py-2 rounded-full text-sm font-medium text-white hover:bg-white hover:text-[#002147] transition-all"
+                        >
+                            Get in Touch
+                            <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                        </Link>
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <div className="md:hidden flex items-center gap-4">
+                        <CartIcon />
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="text-white hover:text-gray-300 transition"
+                        >
+                            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Menu Dropdown */}
+            {mobileMenuOpen && (
+                <div className="md:hidden bg-[#002147] border-t border-white/10 absolute w-full left-0 animate-fade-in-up shadow-xl">
+                    <div className="px-4 pt-2 pb-6 space-y-4 flex flex-col items-center">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.name}
+                                href={link.path}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={`text-base font-medium py-2 ${isActive(link.path) ? "text-white" : "text-gray-400"
+                                    }`}
+                            >
+                                {link.name}
+                            </Link>
+                        ))}
+                        <div className="h-px w-full bg-white/10 my-2"></div>
+                        <UserMenu mobile />
+                        <Link
+                            href="/contact"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="w-full text-center bg-white text-[#002147] font-bold py-3 rounded-md mt-4"
+                        >
+                            Get in Touch
+                        </Link>
+                    </div>
+                </div>
+            )}
+        </nav>
+    );
+}
+
+function CartIcon() {
+    const { cartCount } = useCart()
+    if (cartCount === 0) return null
+
+    return (
+        <Link href="/cart" className="relative p-2 text-white hover:text-blue-300 transition-colors">
+            <ShoppingCart className="w-6 h-6" />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm">
+                {cartCount}
+            </span>
+        </Link>
+    )
+}
+
+function UserMenu({ mobile }: { mobile?: boolean }) {
+    const { data: session } = useSession()
+    const [isOpen, setIsOpen] = useState(false)
+
+    if (!session) {
+        return (
+            <Link
+                href="/client-login"
+                className={`text-sm font-medium hover:text-white transition-colors ${mobile ? "text-gray-300 text-lg" : "text-gray-300"}`}
+            >
+                Login
+            </Link>
+        )
+    }
+
+    if (mobile) {
+        return (
+            <div className="flex flex-col items-center gap-4 w-full">
+                <div className="flex items-center gap-2 text-white">
+                    <User className="w-5 h-5" />
+                    <span className="font-medium">{session.user?.name}</span>
+                </div>
+                {(session.user as any)?.role === 'ADMIN' && (
+                    <Link href="/dashboard/admin" className="text-gray-400 text-sm">Admin Dashboard</Link>
+                )}
+                <button onClick={() => signOut({ callbackUrl: '/' })} className="text-red-400 text-sm">
+                    Sign Out
+                </button>
+            </div>
+        )
+    }
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center gap-2 text-sm font-medium hover:text-gray-300 transition-colors focus:outline-none"
+            >
+                <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white ring-2 ring-white/20 hover:ring-white/40 transition-all shadow-md">
+                    <span className="text-sm font-bold">{session.user?.name?.charAt(0).toUpperCase()}</span>
+                </div>
+            </button>
+
+            {isOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl py-2 text-gray-800 ring-1 ring-black ring-opacity-5 animate-fade-in z-[60]">
+                    <div className="px-5 py-3 border-b border-gray-100">
+                        <p className="text-xs text-gray-500 uppercase font-semibold">Signed in as</p>
+                        <p className="font-bold text-gray-900 truncate">{session.user?.email}</p>
+                    </div>
+
+                    <div className="py-1">
+                        <Link
+                            href="/orders"
+                            className="block px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            My Orders
+                        </Link>
+                        {(session.user as any)?.role === 'ADMIN' && (
+                            <Link
+                                href="/dashboard/admin"
+                                className="block px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Admin Dashboard
+                            </Link>
+                        )}
+                    </div>
+
+                    <div className="border-t border-gray-100 mt-1 py-1">
+                        <button
+                            onClick={() => signOut({ callbackUrl: '/' })}
+                            className="w-full text-left px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                        >
+                            <LogOut className="w-4 h-4" /> Sign out
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
