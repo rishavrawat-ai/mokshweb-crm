@@ -283,9 +283,12 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                                 printingCharge: item.printingCharge ? Number(item.printingCharge) : null,
                                 inventoryHoarding: {
                                     ...item.inventoryHoarding,
-                                    netTotal: Number(item.inventoryHoarding.netTotal || 0)
+                                    netTotal: Number(item.inventoryHoarding.netTotal || 0),
+                                    city: item.inventoryHoarding.city ?? "",
+                                    location: item.inventoryHoarding.location ?? item.inventoryHoarding.locationName
                                 }
-                            }))}
+                            }
+                            ))}
                         />
                     </div>
                 </div>

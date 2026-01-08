@@ -56,7 +56,11 @@ export default async function CityMediaPage({ params }: { params: { city: string
                     <p className="text-gray-500 mt-1">Found {cityHoardings.length} advertising locations</p>
                 </div>
 
-                <CityHoardingTable hoardings={cityHoardings} />
+                <CityHoardingTable hoardings={cityHoardings.map(h => ({
+                    ...h,
+                    location: h.location ?? (h as any).locationName ?? "",
+                    city: h.city ?? ""
+                }))} />
             </div>
         </main>
     )

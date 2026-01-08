@@ -298,3 +298,16 @@ export async function verifyOtpAndReject(requestId: string, otp: string, rejecti
 
     return { success: true }
 }
+
+// -- Legacy / Stub Functions for Build Compatibility --
+export async function verifyDiscountCodeAndApply(args: any): Promise<any> {
+    throw new Error("Legacy function not implemented. Please use verifyOtpAndApprove.")
+}
+
+export async function generateDiscountCode(args: any): Promise<any> {
+    throw new Error("Legacy function not implemented.")
+}
+
+export async function rejectDiscountRequest(args: any): Promise<any> {
+    throw new Error("Legacy function not implemented. Please use verifyOtpAndReject.")
+}

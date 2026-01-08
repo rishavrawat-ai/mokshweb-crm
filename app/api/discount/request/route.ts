@@ -14,6 +14,9 @@ export async function POST(req: Request) {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
+        return new NextResponse("This API is deprecated. Please use the Lead-based discount workflow.", { status: 410 })
+
+        /*
         const body = await req.json()
         const { projectId, discountPct, couponCode, reason } = body
 
@@ -34,19 +37,22 @@ export async function POST(req: Request) {
         // Create Request
         const discountRequest = await db.discountRequest.create({
             data: {
-                projectId,
-                salesUserId: Number(session.user.id),
-                requestedDiscountPct: discountPct ? Number(discountPct) : null,
-                requestedCouponCode: couponCode || null,
+                // projectId, // REMOVED FROM SCHEMA
+                // salesUserId: Number(session.user.id),
+                // requestedDiscountPct: discountPct ? Number(discountPct) : null,
+                // requestedCouponCode: couponCode || null,
                 reason,
                 status: "PENDING",
                 otpHash,
                 otpExpiresAt: expiresAt,
-                lastOtpSentAt: new Date()
+                // lastOtpSentAt: new Date()
+                requestedByUserId: Number(session.user.id),
+                leadId: 0, // Placeholder
+                requestedPercent: discountPct ? Number(discountPct) : 0
             },
             include: {
-                project: true,
-                salesUser: true
+                // project: true,
+                // salesUser: true
             }
         })
 
@@ -55,7 +61,7 @@ export async function POST(req: Request) {
         const emailHtml = `
             <h2>Discount Approval Needed</h2>
             <p><strong>Sales User:</strong> ${session.user.name} (${session.user.email})</p>
-            <p><strong>Project:</strong> ${discountRequest.project.title}</p>
+            <p><strong>Project:</strong> ${"Unknown"}</p>
             <p><strong>Requested Discount:</strong> ${discountPct || 0}%</p>
             <p><strong>Coupon:</strong> ${couponCode || "None"}</p>
             <p><strong>Reason:</strong> ${reason}</p>
@@ -83,6 +89,7 @@ export async function POST(req: Request) {
             requestId: discountRequest.id,
             expiresAt: expiresAt
         })
+        */
 
     } catch (error) {
         console.error("DISCOUNT_REQUEST_ERROR", error)

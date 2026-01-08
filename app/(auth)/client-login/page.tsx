@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { z } from "zod"
@@ -15,7 +15,7 @@ const loginSchema = z.object({
     password: z.string().min(1, "Password is required"),
 })
 
-export default function ClientLoginPage() {
+function ClientLoginForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const callbackUrl = searchParams.get("callbackUrl") || "/"
@@ -179,5 +179,13 @@ export default function ClientLoginPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function ClientLoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <ClientLoginForm />
+        </Suspense>
     )
 }

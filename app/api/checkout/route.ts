@@ -59,7 +59,8 @@ export async function POST(req: Request) {
         })
 
         // 5. Record Payment
-        await db.payment.create({
+        // 5. Record Payment (Payment model removed, Invoice tracks status)
+        /* await db.payment.create({
             data: {
                 projectId: project.id,
                 amount: totalAmount,
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
                 status: "SUCCESS",
                 transactionRef: `TXN_${Date.now()}`
             }
-        })
+        }) */
 
         // 6. Emails
 

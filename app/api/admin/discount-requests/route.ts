@@ -19,17 +19,23 @@ export async function GET(req: Request) {
         const requests = await db.discountRequest.findMany({
             where,
             include: {
-                project: {
-                    select: { title: true, id: true }
+                lead: {
+                    select: { customerName: true, id: true }
                 },
-                salesUser: {
+                requestedByUser: {
                     select: { name: true, email: true }
                 }
             },
             orderBy: { createdAt: 'desc' }
         })
 
-        return NextResponse.json(requests)
+        const formatted = requests.map(r => ({
+            ...r,
+            project: { title: r.lead.customerName, id: r.lead.id },
+            salesUser: r.requestedByUser
+        }))
+
+        return NextResponse.json(formatted)
 
     } catch (error) {
         console.error("ADMIN_GET_REQUESTS_ERROR", error)

@@ -12,6 +12,9 @@ export async function POST(req: Request) {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
+        return new NextResponse("This API is deprecated.", { status: 410 })
+
+        /*
         const body = await req.json()
         const { requestId, otp } = body
 
@@ -33,7 +36,7 @@ export async function POST(req: Request) {
         }
 
         // Validate Attempts
-        if (request.attemptCount >= 3) {
+        if (request.otpAttempts >= 3) {
             await db.discountRequest.update({
                 where: { id: requestId },
                 data: { status: "LOCKED" }
@@ -42,7 +45,7 @@ export async function POST(req: Request) {
         }
 
         // Validate Expiry
-        if (new Date() > request.otpExpiresAt) {
+        if (request.otpExpiresAt && new Date() > request.otpExpiresAt) {
             await db.discountRequest.update({
                 where: { id: requestId },
                 data: { status: "EXPIRED" }
@@ -51,21 +54,21 @@ export async function POST(req: Request) {
         }
 
         // Validate User (Sales verifies own, Admin can verify any)
-        if (session.user.role === 'SALES' && request.salesUserId !== Number(session.user.id)) {
-            return new NextResponse("Forbidden", { status: 403 })
-        }
+        // if (session.user.role === 'SALES' && request.salesUserId !== Number(session.user.id)) {
+        //    return new NextResponse("Forbidden", { status: 403 })
+        // }
 
         // Check OTP
-        const isValid = await compare(otp, request.otpHash)
+        // const isValid = await compare(otp, request.otpHash!)
 
-        if (!isValid) {
-            await db.discountRequest.update({
-                where: { id: requestId },
-                data: { attemptCount: { increment: 1 } }
-            })
-            await createAuditLog(Number(session.user.id), "DISCOUNT_OTP_FAILED", "DiscountRequest", requestId)
-            return new NextResponse("Invalid OTP", { status: 400 })
-        }
+        // if (!isValid) {
+        //    await db.discountRequest.update({
+        //        where: { id: requestId },
+        //        data: { otpAttempts: { increment: 1 } }
+        //    })
+        //    await createAuditLog(Number(session.user.id), "DISCOUNT_OTP_FAILED", "DiscountRequest", requestId)
+        //    return new NextResponse("Invalid OTP", { status: 400 })
+        // }
 
         // Success Flow
         // 1. Update Request
@@ -74,34 +77,22 @@ export async function POST(req: Request) {
             data: {
                 status: "APPROVED",
                 approvedAt: new Date(),
-                // If verified by OTP, we can consider it approved by the system or attribute to admin
-                // But prompt says "approvedByAdminId" - we can leave null or use a System Admin ID if we have one.
-                // Or if Admin entered OTP, use Admin ID.
                 approvedByAdminId: session.user.role === 'ADMIN' ? Number(session.user.id) : null
             }
         })
 
-        // 2. Update Project
-        await db.project.update({
-            where: { id: request.projectId },
-            data: {
-                discountPct: request.requestedDiscountPct ? request.requestedDiscountPct : undefined,
-                discountPercent: request.requestedDiscountPct ? request.requestedDiscountPct : undefined, // Syncing both for compatibility
-                couponCode: request.requestedCouponCode,
-                discountApprovedRequestId: request.id,
-                discountApprovedAt: new Date()
-            }
-        })
-
+        // 2. Update Project (Linking removed)
+        
         await createAuditLog(
             Number(session.user.id),
             "DISCOUNT_APPROVED_BY_OTP",
-            "Project",
-            String(request.projectId),
+            "DiscountRequest",
+            String(requestId),
             { requestId: request.id }
         )
 
-        return NextResponse.json({ success: true, projectId: request.projectId })
+        return NextResponse.json({ success: true, projectId: 0 })
+        */
 
     } catch (error) {
         console.error("DISCOUNT_VERIFY_ERROR", error)

@@ -14,6 +14,9 @@ export async function POST(req: Request) {
             return new NextResponse("Unauthorized", { status: 401 })
         }
 
+        return new NextResponse("This API is deprecated.", { status: 410 })
+
+        /*
         const body = await req.json()
         const { requestId } = body
 
@@ -21,7 +24,10 @@ export async function POST(req: Request) {
 
         const request = await db.discountRequest.findUnique({
             where: { id: requestId },
-            include: { project: true, salesUser: true }
+            include: { 
+                // project: true, 
+                // salesUser: true 
+            }
         })
 
         if (!request) return new NextResponse("Not Found", { status: 404 })
@@ -30,9 +36,9 @@ export async function POST(req: Request) {
             return new NextResponse("Request is not Pending", { status: 400 })
         }
 
-        if (session.user.role === 'SALES' && request.salesUserId !== Number(session.user.id)) {
-            return new NextResponse("Forbidden", { status: 403 })
-        }
+        // if (session.user.role === 'SALES' && request.salesUserId !== Number(session.user.id)) {
+        //    return new NextResponse("Forbidden", { status: 403 })
+        // }
 
         // Rate Limit
         if (request.lastOtpSentAt) {
@@ -54,8 +60,8 @@ export async function POST(req: Request) {
             data: {
                 otpHash,
                 otpExpiresAt: expiresAt,
-                lastOtpSentAt: new Date(),
-                attemptCount: 0 // Optional: Reset attempts on resend? Usually yes or no depending on policy. Prompt didn't specify. I'll NOT reset attempts to prevent brute force RESEND-GUESS loops, but usually new OTP implies new chance. I'll reset attempts for better UX.
+                // lastOtpSentAt: new Date(),
+                // attemptCount: 0 
             }
         })
 
@@ -79,6 +85,7 @@ export async function POST(req: Request) {
         await createAuditLog(Number(session.user.id), "DISCOUNT_OTP_RESENT", "DiscountRequest", requestId)
 
         return NextResponse.json({ success: true, expiresAt })
+        */
 
     } catch (error) {
         console.error("DISCOUNT_RESEND_ERROR", error)

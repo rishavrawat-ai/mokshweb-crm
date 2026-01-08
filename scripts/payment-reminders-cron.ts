@@ -84,13 +84,13 @@ export async function runPaymentReminders() {
                     try {
                         const clientTemplate = getClientPaymentReminderTemplate({
                             customerName: payment.lead.customerName,
-                            invoiceNo: payment.invoiceNo,
+                            invoiceNo: payment.invoiceNo || undefined,
                             totalAmount: Number(payment.totalAmount),
                             paidAmount: Number(payment.paidAmount),
                             pendingAmount: Number(payment.pendingAmount),
                             dueDate: payment.dueDate!,
                             salesRepName: payment.lead.salesUser?.name || "Sales Team",
-                            salesRepPhone: payment.lead.salesUser?.phone,
+                            salesRepPhone: payment.lead.salesUser?.phone || undefined,
                             isOverdue: overdue,
                         });
 
@@ -132,12 +132,12 @@ export async function runPaymentReminders() {
                         const internalTemplate = getInternalPaymentReminderTemplate({
                             leadName: payment.lead.customerName,
                             leadPhone: payment.lead.phone,
-                            invoiceNo: payment.invoiceNo,
+                            invoiceNo: payment.invoiceNo || undefined,
                             pendingAmount: Number(payment.pendingAmount),
                             dueDate: payment.dueDate!,
                             status: payment.status,
-                            lastFollowupNote: payment.lastFollowupNote,
-                            clientCommitmentDate: payment.clientCommitmentDate,
+                            lastFollowupNote: payment.lastFollowupNote || undefined,
+                            clientCommitmentDate: payment.clientCommitmentDate || undefined,
                             isOverdue: overdue,
                         });
 
@@ -179,12 +179,12 @@ export async function runPaymentReminders() {
                         const internalTemplate = getInternalPaymentReminderTemplate({
                             leadName: payment.lead.customerName,
                             leadPhone: payment.lead.phone,
-                            invoiceNo: payment.invoiceNo,
+                            invoiceNo: payment.invoiceNo || undefined,
                             pendingAmount: Number(payment.pendingAmount),
                             dueDate: payment.dueDate!,
                             status: payment.status,
-                            lastFollowupNote: payment.lastFollowupNote,
-                            clientCommitmentDate: payment.clientCommitmentDate,
+                            lastFollowupNote: payment.lastFollowupNote || undefined,
+                            clientCommitmentDate: payment.clientCommitmentDate || undefined,
                             isOverdue: overdue,
                         });
 

@@ -21,6 +21,9 @@ async function seed() {
             data: {
                 state: loc.state,
                 city: loc.city,
+                district: loc.city,
+                locationName: loc.location,
+                outletName: loc.location,
                 location: loc.location,
                 rate: loc.rate,
                 printingCharge: loc.printing,

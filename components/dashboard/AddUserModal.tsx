@@ -16,7 +16,7 @@ export default function AddUserModal({ onClose }: { onClose: () => void }) {
     const [error, setError] = useState("")
 
     const form = useForm<UserFormValues>({
-        resolver: zodResolver(userCreateSchema),
+        resolver: zodResolver(userCreateSchema) as any,
         defaultValues: {
             name: "",
             email: "",

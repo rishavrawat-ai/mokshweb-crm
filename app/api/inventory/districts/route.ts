@@ -19,9 +19,6 @@ export async function GET(req: Request) {
             by: ['district'],
             where: {
                 state: state,
-                district: {
-                    not: null
-                }
             },
             _count: {
                 id: true
