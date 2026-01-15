@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 import ServicesSection from "@/components/ServicesSection";
 import AboutSection from "@/components/AboutSection";
 import ClientsSection from "@/components/ClientsSection";
@@ -10,19 +10,34 @@ export default function Home() {
   return (
     <main className="bg-white min-h-screen relative overflow-hidden">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-[#002147] text-white overflow-hidden">
+      {/* Full Screen Video Section */}
+      <section className="relative w-full h-screen overflow-hidden bg-black">
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/videos/Black.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </section>
+
+      {/* Hero Content Section */}
+      <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 bg-[#002147] text-white overflow-hidden">
         {/* Background Elements */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 opacity-50"></div>
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 opacity-50"></div>
           <div className="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-            {/* Left Content */}
-            <div className="flex-1 space-y-8 animate-fade-in-up">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/50 border border-blue-700/50 text-blue-200 text-xs font-medium uppercase tracking-wider">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
+            {/* Content */}
+            <div className="space-y-8 animate-fade-in-up flex flex-col items-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/50 border border-blue-700/50 text-blue-200 text-xs font-medium uppercase tracking-wider backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                 Leading OOH Media Agency
               </div>
@@ -32,11 +47,11 @@ export default function Home() {
                   Lasting Impact.
                 </span>
               </h1>
-              <p className="text-lg lg:text-xl text-gray-300 max-w-xl leading-relaxed font-light">
+              <p className="text-lg lg:text-xl text-gray-200 max-w-2xl leading-relaxed font-light">
                 Empowering brands through innovative Petrol Pump OOH campaigns and powerful media solutions across India.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center">
                 <Link
                   href="/petrolpump-media"
                   className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-lg transition-all shadow-lg hover:shadow-blue-500/25 flex items-center justify-center gap-2"
@@ -51,45 +66,20 @@ export default function Home() {
                 </Link>
               </div>
 
-              <div className="pt-8 flex items-center gap-8 text-sm text-gray-400">
-                <div>
+              <div className="pt-8 flex items-center gap-8 text-sm text-gray-300 justify-center">
+                <div className="text-center">
                   <span className="block text-2xl font-bold text-white">2000+</span>
                   <span>Hoardings</span>
                 </div>
-                <div className="h-8 w-px bg-white/10"></div>
-                <div>
+                <div className="h-8 w-px bg-white/20"></div>
+                <div className="text-center">
                   <span className="block text-2xl font-bold text-white">100+</span>
                   <span>Cities</span>
                 </div>
-                <div className="h-8 w-px bg-white/10"></div>
-                <div>
+                <div className="h-8 w-px bg-white/20"></div>
+                <div className="text-center">
                   <span className="block text-2xl font-bold text-white">99%</span>
                   <span>Satisfaction</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Image */}
-            <div className="flex-1 w-full relative lg:h-[600px] flex items-center justify-center animate-fade-in">
-              <div className="relative w-full aspect-video lg:aspect-square max-w-lg mx-auto">
-                {/* Decorative rings */}
-                <div className="absolute inset-0 border border-white/10 rounded-full scale-110 animate-[spin_60s_linear_infinite]"></div>
-                <div className="absolute inset-0 border border-white/5 rounded-full scale-125 animate-[spin_40s_linear_infinite_reverse]"></div>
-
-                <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-gray-900/50 backdrop-blur-sm group">
-                  <Image
-                    src="/images/hero-new.png"
-                    alt="Strategic Media Advertising at HP Petrol Pump"
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#002147]/80 to-transparent opacity-60"></div>
-                  <div className="absolute bottom-0 left-0 p-8">
-                    <p className="text-white font-bold text-lg">Premium Hoarding Spaces</p>
-                    <p className="text-blue-200 text-sm">High visibility across India</p>
-                  </div>
                 </div>
               </div>
             </div>

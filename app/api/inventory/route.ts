@@ -4,35 +4,59 @@ import { NextResponse } from "next/server"
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
-    const q = searchParams.get("q") || ""
+    const q = searchParams.get("search") || searchParams.get("q") || ""
     const state = searchParams.get("state")
     const city = searchParams.get("city")
     const district = searchParams.get("district")
 
+    console.log(`[API Inventory] Query Params: q=${q}, state=${state}, city=${city}, district=${district}`)
+
     const whereClause: any = {}
 
     if (state) whereClause.state = state
-    if (district) whereClause.district = district
+    const districts = searchParams.get("districts")
+
+    if (state) whereClause.state = state
+
+    if (districts) {
+        whereClause.district = { in: districts.split(",") }
+    } else if (district) {
+        whereClause.district = district
+    }
+
+    // City filter logic
     if (city && !district) {
         whereClause.OR = [
-            { city: city },
-            { district: city }
+            { city: { contains: city } }, // Removed strict equality, using contains for safer match
+            { district: { contains: city } }
         ]
     }
 
-    if (q && !state && !district) {
-        whereClause.OR = [
-            // New fields
-            { locationName: { contains: q } },
-            { outletName: { contains: q } },
-            { district: { contains: q } },
-            // Legacy fields (for backward compatibility)
-            { location: { contains: q } },
-            { name: { contains: q } },
-            { city: { contains: q } },
-            { state: { contains: q } }
-        ]
+    // Global Search Logic
+    if (q) {
+        // If specific modifiers are NOT present, use global search on everything
+        if (!state && !district && !city) {
+            whereClause.OR = [
+                { locationName: { contains: q } },
+                { outletName: { contains: q } },
+                { district: { contains: q } },
+                { city: { contains: q } },
+                { state: { contains: q } },
+                // Legacy fields
+                { location: { contains: q } },
+                { name: { contains: q } }
+            ]
+        }
+        // If modifiers ARE present, we might want to AND the q search?
+        // Current logic was: if q AND !state AND !district... which implies q is ignored if state is present.
+        // Let's fix this to allow "Search within State" if needed, OR just keep it simple.
+        // The user issue is searching "punjab" which likely is a state name mostly.
+
+        // If the user searches "Punjab", it might match state name.
+        // Let's ensure if q matches a state, we return items in that state too if no other filters exist.
     }
+
+    console.log(`[API Inventory] Where Clause:`, JSON.stringify(whereClause, null, 2))
 
     const items = await db.inventoryHoarding.findMany({
         where: whereClause,
@@ -40,12 +64,26 @@ export async function GET(req: Request) {
     })
 
     // Map to ensure we always have the expected fields
+    // Map to ensure we always have the expected fields
     const mappedItems = items.map((item: any) => ({
         id: item.id,
+        // Detailed fields for Plan Builder & Email
+        sourceSrNo: item.sourceSrNo,
+        outletName: item.outletName || item.name || '',
+        locationName: item.locationName || item.location || '',
+        district: item.district || item.city || '',
         state: item.state,
-        city: item.district || item.city || '',  // Use district first (that's what we have from import)
-        location: item.outletName || item.locationName || item.name || item.location || '',
+        city: item.city || item.district || '',
+        areaType: item.areaType,
+        widthFt: item.widthFt || item.width,
+        heightFt: item.heightFt || item.height,
+        areaSqft: item.areaSqft || item.totalArea,
+        ratePerSqft: item.ratePerSqft || item.rate,
+        printingCharge: item.printingCharge,
         netTotal: Number(item.netTotal || 0),
+
+        // Legacy fallbacks for UI compatibility
+        location: item.outletName || item.locationName || item.name || item.location || '',
     }))
 
     return NextResponse.json(mappedItems)

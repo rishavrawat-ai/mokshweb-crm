@@ -2,21 +2,21 @@
  * Email template for Super Admin Discount Approval Request
  */
 export function getDiscountApprovalEmailTemplate(data: {
-    leadName: string;
-    leadPhone: string;
-    leadEmail?: string;
-    salesRepName: string;
-    requestedDiscount: number;
-    basePriceBeforeDiscount: number;
-    finalPriceAfterDiscount: number;
-    reason: string;
-    budgetDetails?: string;
-    campaignDetails?: string;
-    reviewLink: string;
+  leadName: string;
+  leadPhone: string;
+  leadEmail?: string;
+  salesRepName: string;
+  requestedDiscount: number;
+  basePriceBeforeDiscount: number;
+  finalPriceAfterDiscount: number;
+  reason: string;
+  budgetDetails?: string;
+  campaignDetails?: string;
+  reviewLink: string;
 }) {
-    const subject = `🔔 Discount Approval Required: ${data.requestedDiscount}% for ${data.leadName}`;
+  const subject = `🔔 Discount Approval Required: ${data.requestedDiscount}% for ${data.leadName}`;
 
-    const html = `
+  const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -113,16 +113,16 @@ export function getDiscountApprovalEmailTemplate(data: {
 </html>
   `;
 
-    return { subject, html };
+  return { subject, html };
 }
 
 /**
  * Email template for OTP
  */
 export function getOTPEmailTemplate(otp: string, leadName: string) {
-    const subject = `🔐 Your OTP for Discount Approval: ${otp}`;
+  const subject = `🔐 Your OTP for Discount Approval: ${otp}`;
 
-    const html = `
+  const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -168,32 +168,32 @@ export function getOTPEmailTemplate(otp: string, leadName: string) {
 </html>
   `;
 
-    return { subject, html };
+  return { subject, html };
 }
 
 /**
  * Email template for Payment Reminder (Client)
  */
 export function getClientPaymentReminderTemplate(data: {
-    customerName: string;
-    invoiceNo?: string;
-    totalAmount: number;
-    paidAmount: number;
-    pendingAmount: number;
-    dueDate: Date;
-    salesRepName: string;
-    salesRepPhone?: string;
-    isOverdue: boolean;
+  customerName: string;
+  invoiceNo?: string;
+  totalAmount: number;
+  paidAmount: number;
+  pendingAmount: number;
+  dueDate: Date;
+  salesRepName: string;
+  salesRepPhone?: string;
+  isOverdue: boolean;
 }) {
-    const daysOverdue = data.isOverdue
-        ? Math.ceil((new Date().getTime() - data.dueDate.getTime()) / (1000 * 60 * 60 * 24))
-        : 0;
+  const daysOverdue = data.isOverdue
+    ? Math.ceil((new Date().getTime() - data.dueDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
 
-    const subject = data.isOverdue
-        ? `⚠️ Payment Overdue: ₹${data.pendingAmount.toLocaleString('en-IN')} - ${data.invoiceNo || 'Invoice'}`
-        : `🔔 Payment Reminder: ₹${data.pendingAmount.toLocaleString('en-IN')} - ${data.invoiceNo || 'Invoice'}`;
+  const subject = data.isOverdue
+    ? `⚠️ Payment Overdue: ₹${data.pendingAmount.toLocaleString('en-IN')} - ${data.invoiceNo || 'Invoice'}`
+    : `🔔 Payment Reminder: ₹${data.pendingAmount.toLocaleString('en-IN')} - ${data.invoiceNo || 'Invoice'}`;
 
-    const html = `
+  const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -213,9 +213,9 @@ export function getClientPaymentReminderTemplate(data: {
     
     <p style="font-size: 16px;">
       ${data.isOverdue
-            ? `This is a reminder that your payment is <strong style="color: #dc2626;">overdue by ${daysOverdue} day${daysOverdue > 1 ? 's' : ''}</strong>.`
-            : 'This is a friendly reminder about your upcoming payment.'
-        }
+      ? `This is a reminder that your payment is <strong style="color: #dc2626;">overdue by ${daysOverdue} day${daysOverdue > 1 ? 's' : ''}</strong>.`
+      : 'This is a friendly reminder about your upcoming payment.'
+    }
     </p>
     
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${data.isOverdue ? '#dc2626' : '#3b82f6'};">
@@ -271,26 +271,26 @@ export function getClientPaymentReminderTemplate(data: {
 </html>
   `;
 
-    return { subject, html };
+  return { subject, html };
 }
 
 /**
  * Email template for Internal Payment Reminder (Sales/Finance)
  */
 export function getInternalPaymentReminderTemplate(data: {
-    leadName: string;
-    leadPhone: string;
-    invoiceNo?: string;
-    pendingAmount: number;
-    dueDate: Date;
-    status: string;
-    lastFollowupNote?: string;
-    clientCommitmentDate?: Date;
-    isOverdue: boolean;
+  leadName: string;
+  leadPhone: string;
+  invoiceNo?: string;
+  pendingAmount: number;
+  dueDate: Date;
+  status: string;
+  lastFollowupNote?: string;
+  clientCommitmentDate?: Date;
+  isOverdue: boolean;
 }) {
-    const subject = `💼 Payment Follow-up: ${data.leadName} - ₹${data.pendingAmount.toLocaleString('en-IN')}`;
+  const subject = `💼 Payment Follow-up: ${data.leadName} - ₹${data.pendingAmount.toLocaleString('en-IN')}`;
 
-    const html = `
+  const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -374,5 +374,258 @@ export function getInternalPaymentReminderTemplate(data: {
 </html>
   `;
 
-    return { subject, html };
+  return { subject, html };
+}
+
+/**
+ * Email template for Discount Inquiry Notification (Admin)
+ */
+export function getDiscountInquiryAdminEmailTemplate(data: {
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string;
+  companyName?: string;
+  baseTotal: number;
+  requestedDiscount?: string;
+  notes?: string;
+  itemsCount: number;
+  otp: string;
+  otpExpiresAt: Date;
+  approveLink: string;
+}) {
+  const subject = `🔔 New Discount Inquiry: ₹${data.baseTotal.toLocaleString('en-IN')} by ${data.clientName}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Discount Inquiry Verification</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  
+  <div style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">New Discount Inquiry</h1>
+  </div>
+  
+  <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+
+    <p>A new client has requested a discount plan from the cart.</p>
+
+    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+        <h3 style="margin-top:0;">Client Details</h3>
+        <p><strong>Name:</strong> ${data.clientName}</p>
+        <p><strong>Email:</strong> ${data.clientEmail}</p>
+        <p><strong>Number:</strong> ${data.clientPhone || 'N/A'}</p>
+        <p><strong>Company:</strong> ${data.companyName || 'N/A'}</p>
+        <p><strong>Items:</strong> ${data.itemsCount}</p>
+        <p><strong>Est. Base Total:</strong> ₹${data.baseTotal.toLocaleString('en-IN')}</p>
+        ${data.notes ? `<p><strong>Notes:</strong> ${data.notes}</p>` : ''}
+        ${data.requestedDiscount ? `<p><strong>Expected Discount:</strong> ${data.requestedDiscount}</p>` : ''}
+    </div>
+
+    <div style="background: white; padding: 20px; border-radius: 8px; text-align: center; border: 2px dashed #4f46e5;">
+      <p style="margin:0; text-transform:uppercase; letter-spacing:1px; font-size:12px; color:#6b7280;">OTP for Approval</p>
+      <div style="font-size: 32px; font-weight: 700; letter-spacing: 5px; color: #4338ca; margin: 10px 0;">
+        ${data.otp}
+      </div>
+      <p style="font-size:12px; color:#ef4444;">Expires in 10 minutes</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="${data.approveLink}" style="display: inline-block; background: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600;">
+        Review & Approve Now
+      </a>
+      <p style="font-size: 11px; margin-top: 10px; color: #6b7280;">You will need the OTP above to complete the action.</p>
+    </div>
+    
+  </div>
+</body>
+</html>
+  `;
+  return { subject, html };
+}
+
+/**
+ * Email template for Discount Plan Approved (Client)
+ */
+export function getDiscountInquiryClientTemplate(data: {
+  clientName: string;
+  baseTotal: number;
+  discountPercent: number;
+  discountAmount: number;
+  finalTotal: number;
+  itemsHtmlTable: string; // pre-rendered simplified table row
+}) {
+  const subject = `🎉 Your Discounted Campaign Plan is Ready!`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Discount Plan Approved</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  
+  <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">Good News, ${data.clientName}!</h1>
+  </div>
+  
+  <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+    
+    <p>We are excited to offer you a special discounted rate for your campaign.</p>
+
+    <div style="background: white; padding: 0; border-radius: 8px; overflow:hidden; margin-bottom: 20px;">
+        <table style="width:100%; text-align:left; border-collapse:collapse;">
+            <thead style="background:#f3f4f6;">
+                <tr>
+                    <th style="padding:10px;">Item</th>
+                    <th style="padding:10px; text-align:right;">Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.itemsHtmlTable}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span>Base Total:</span>
+            <span>₹${data.baseTotal.toLocaleString('en-IN')}</span>
+         </div>
+         <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#059669;">
+            <span>Discount (${data.discountPercent}%):</span>
+            <span>- ₹${data.discountAmount.toLocaleString('en-IN')}</span>
+         </div>
+         <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #e5e7eb; pt-2; font-weight:bold; font-size:18px;">
+            <span>Final Total:</span>
+            <span>₹${data.finalTotal.toLocaleString('en-IN')}</span>
+         </div>
+    </div>
+
+    <p>To proceed with this plan, please contact our sales team at sales@mokshpromotion.com or reply to this email.</p>
+    
+  </div>
+</body>
+</html>
+  `;
+  return { subject, html };
+}
+
+/**
+ * Email template for Campaign Plan Proposal (Client) with Detailed Inventory
+ */
+export function getPlanEmailTemplate(data: {
+  clientName: string;
+  planId: string;
+  items: any[];
+  baseTotal: number;
+  discountType: string;
+  discountValue: number;
+  discountAmount: number;
+  finalTotal: number;
+  senderName: string;
+  notes?: string;
+}) {
+  const subject = `📋 Your Campaign Proposal from Moksh Promotion (Plan #${data.planId.slice(-6)})`;
+
+  const itemsHtml = data.items.map((item, index) => `
+    <tr style="border-bottom: 1px solid #e5e7eb; font-size: 11px;">
+      <td style="padding: 6px;">${item.sourceSrNo || index + 1}</td>
+      <td style="padding: 6px;">
+        <div style="font-weight: 600;">${item.outletName || item.name}</div>
+      </td>
+      <td style="padding: 6px;">${item.locationName || item.location}</td>
+      <td style="padding: 6px;">${item.district}</td>
+      <td style="padding: 6px;">${item.state}</td>
+      <td style="padding: 6px;">${item.areaType || '-'}</td>
+      <td style="padding: 6px; white-space: nowrap;">${item.widthFt || item.width} x ${item.heightFt || item.height}</td>
+      <td style="padding: 6px;">${item.areaSqft || item.totalArea}</td>
+      <td style="padding: 6px;">₹${Number(item.ratePerSqft || item.rate).toLocaleString('en-IN')}</td>
+      <td style="padding: 6px;">₹${Number(item.printingCharge || 0).toLocaleString('en-IN')}</td>
+      <td style="padding: 6px; font-weight: 700; text-align: right;">₹${Number(item.netTotal).toLocaleString('en-IN')}</td>
+    </tr>
+  `).join('');
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Campaign Proposal</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 1000px; margin: 0 auto; padding: 20px;">
+  
+  <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">Campaign Proposal</h1>
+    <p style="color: #bfdbfe; margin-top: 5px;">Prepared for ${data.clientName}</p>
+  </div>
+  
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
+    
+    <p>Dear ${data.clientName},</p>
+    <p>Please find below the detailed campaign plan as discussed.</p>
+
+    <div style="background: white; border-radius: 8px; overflow-x: auto; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <table style="width:100%; min-width: 900px; text-align:left; border-collapse:collapse;">
+        <thead style="background:#f3f4f6;">
+          <tr style="font-size: 11px; text-transform:uppercase; color:#6b7280;">
+            <th style="padding:8px;">Sr</th>
+            <th style="padding:8px;">Outlet</th>
+            <th style="padding:8px;">Location</th>
+            <th style="padding:8px;">District</th>
+            <th style="padding:8px;">State</th>
+            <th style="padding:8px;">Type</th>
+            <th style="padding:8px;">W x H (ft)</th>
+            <th style="padding:8px;">Area (sqft)</th>
+            <th style="padding:8px;">Rate</th>
+            <th style="padding:8px;">Print Chg</th>
+            <th style="padding:8px; text-align:right;">Net Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsHtml}
+        </tbody>
+      </table>
+    </div>
+
+    ${data.notes ? `
+    <div style="background: #eff6ff; padding: 15px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-bottom: 20px;">
+      <h4 style="margin:0 0 5px 0; color: #1e40af;">Notes</h4>
+      <p style="margin:0; font-size: 14px; color: #1e3a8a;">${data.notes}</p>
+    </div>
+    ` : ''}
+
+    <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb; max-width: 400px; margin-left: auto;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <span style="color:#6b7280;">Base Total</span>
+        <span style="font-weight:600;">₹${data.baseTotal.toLocaleString('en-IN')}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#ef4444;">
+        <span>Discount (${data.discountType === 'PERCENT' ? `${data.discountValue}%` : 'Flat'})</span>
+        <span>- ₹${data.discountAmount.toLocaleString('en-IN')}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:1px solid #e5e7eb; font-size:18px; font-weight:700; color:#1d4ed8;">
+        <span>Final Total</span>
+        <span>₹${data.finalTotal.toLocaleString('en-IN')}</span>
+      </div>
+    </div>
+
+    <p style="font-size: 14px; color: #6b7280; text-align: center;">
+      To approve this plan, please reply to this email or contact <strong>${data.senderName}</strong>.
+    </p>
+
+  </div>
+  
+  <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+    <p>Moksh Promotion | Strategic Outdoor Media Solutions</p>
+  </div>
+  
+</body>
+</html>
+  `;
+
+  return { subject, html };
 }

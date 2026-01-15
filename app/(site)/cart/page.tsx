@@ -5,6 +5,7 @@ import { Trash2, ArrowLeft, CreditCard, FileText } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import QuoteModal from "@/components/QuoteModal"
+import DiscountRequestModal from "@/components/DiscountRequestModal"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
@@ -12,6 +13,7 @@ export default function CartPage() {
     const { cartItems, removeFromCart, clearCart } = useCart()
     const { data: session } = useSession()
     const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
+    const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false)
     const router = useRouter()
 
     const formatCurrency = (val: any) => {
@@ -186,8 +188,15 @@ export default function CartPage() {
                                     <FileText className="w-5 h-5" />
                                     Request Formal Quote
                                 </button>
+                                <button
+                                    onClick={() => setIsDiscountModalOpen(true)}
+                                    className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                                >
+                                    <FileText className="w-5 h-5" />
+                                    Request Discount Plan
+                                </button>
                                 <p className="text-xs text-gray-500 text-center mt-2">
-                                    Request a quote to get customized rates and availability check.
+                                    Request a quote or discount plan to get customized rates.
                                 </p>
                             </div>
                         </div>
@@ -202,6 +211,10 @@ export default function CartPage() {
             <QuoteModal
                 isOpen={isQuoteModalOpen}
                 onClose={() => setIsQuoteModalOpen(false)}
+            />
+            <DiscountRequestModal
+                isOpen={isDiscountModalOpen}
+                onClose={() => setIsDiscountModalOpen(false)}
             />
         </div>
     )

@@ -34,6 +34,39 @@ model User {
   
   discountRequests DiscountRequest[] @relation("SalesUserDiscounts")
   approvedDiscounts DiscountRequest[] @relation("AdminApprovals")
+  approvedInquiries DiscountInquiry[] @relation("InquiryApprovals")
+  plans             Plan[]
+}
+
+// ... existing models ...
+
+model Plan {
+  id              String   @id @default(cuid())
+  userId          Int
+  createdBy       User     @relation(fields: [userId], references: [id])
+  
+  clientName      String
+  clientEmail     String
+  clientPhone     String?
+  companyName     String?
+  
+  status          String   @default("DRAFT") // DRAFT, SENT, CONVERTED, EXPIRED
+
+  // Pricing
+  baseTotal       Decimal
+  discountType    String   @default("PERCENT") // PERCENT, FLAT
+  discountValue   Decimal  @default(0) // Input value
+  discountAmount  Decimal  @default(0) // Computed amount
+  finalTotal      Decimal
+
+  // Data
+  itemsSnapshot   String   // JSON
+  notes           String?
+
+  sentAt          DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 
@@ -395,6 +428,45 @@ model AuditLog {
   entityId    String
   metaJson    String   @default("{}")
   createdAt   DateTime @default(now())
+}
+
+model DiscountInquiry {
+  id              String    @id @default(cuid())
+  clientName      String
+  clientEmail     String
+  clientPhone     String?
+  companyName     String?
+  notes           String?
+  // Enum: PENDING, APPROVED, REJECTED, EXPIRED
+  status          String    @default("PENDING")
+
+  baseTotal       Decimal
+  discountPercent Decimal?
+  discountAmount  Decimal?
+  finalTotal      Decimal?
+
+  cartSnapshot    String    // JSON string stringifying the cart items
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  approvedByUserId Int?
+  approvedByUser   User?    @relation("InquiryApprovals", fields: [approvedByUserId], references: [id])
+
+  adminOtp        AdminOtp?
+}
+
+model AdminOtp {
+  id              String          @id @default(cuid())
+  inquiryId       String          @unique
+  discountInquiry DiscountInquiry @relation(fields: [inquiryId], references: [id])
+
+  otpHash         String
+  expiresAt       DateTime
+  attemptCount    Int             @default(0)
+  consumedAt      DateTime?
+
+  createdAt       DateTime        @default(now())
 }
 
 

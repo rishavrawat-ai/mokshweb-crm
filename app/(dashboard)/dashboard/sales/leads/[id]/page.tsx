@@ -117,6 +117,9 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
     const uniqueCities = new Set(lead.campaignItems.map(item => item.inventoryHoarding.city)).size
     const avgPrice = totalItems > 0 ? lead.campaignItems.reduce((acc, curr) => acc + Number(curr.total), 0) / totalItems : 0
 
+    // Fallback logic: If salesUser is null, checks if current assignee is a valid sales rep (Sales/Admin) to display them
+    const displaySalesUser = lead.salesUser || (['SALES', 'ADMIN', 'SUPER_ADMIN'].includes(lead.assignee?.role || '') ? lead.assignee : null)
+
     return (
         <div className="w-full max-w-[1400px] mx-auto p-6 space-y-6">
             {/* Header Area */}
@@ -188,11 +191,11 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                                         <div className="flex items-center justify-between p-2.5 rounded-lg border border-gray-100 bg-gray-50/50">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold ring-2 ring-white">
-                                                    {lead.salesUser?.name?.[0] || 'S'}
+                                                    {displaySalesUser?.name?.[0] || 'S'}
                                                 </div>
                                                 <div>
                                                     <p className="text-[10px] uppercase font-bold text-blue-600">Sales</p>
-                                                    <p className="text-sm font-medium text-gray-900 leading-none">{lead.salesUser?.name || "Unassigned"}</p>
+                                                    <p className="text-sm font-medium text-gray-900 leading-none">{displaySalesUser?.name || "Unassigned"}</p>
                                                 </div>
                                             </div>
                                         </div>

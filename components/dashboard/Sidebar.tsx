@@ -19,7 +19,8 @@ import {
     X,
     ChevronRight,
     Search,
-    Bell
+    Bell,
+    ClipboardList
 } from "lucide-react"
 
 interface SidebarProps {
@@ -36,7 +37,7 @@ export function Sidebar({ role = "SALES", isOpen, setIsOpen }: SidebarProps) {
             label: "Overview",
             href: "/dashboard",
             icon: LayoutDashboard,
-            active: pathname === "/dashboard" || (pathname.startsWith("/dashboard/sales") && !pathname.includes("leads") && !pathname.includes("projects")) || (pathname.startsWith("/dashboard/admin") && !pathname.includes("inventory") && !pathname.includes("users")),
+            active: pathname === "/dashboard" || (pathname.startsWith("/dashboard/sales") && !pathname.includes("leads") && !pathname.includes("projects") && !pathname.includes("plans")) || (pathname.startsWith("/dashboard/admin") && !pathname.includes("inventory") && !pathname.includes("users")),
             roles: ["ADMIN", "SALES", "FINANCE", "OPERATIONS"]
         },
         {
@@ -51,6 +52,13 @@ export function Sidebar({ role = "SALES", isOpen, setIsOpen }: SidebarProps) {
             href: "/dashboard/sales/projects",
             icon: Building2,
             active: pathname.includes("/dashboard/sales/projects"),
+            roles: ["ADMIN", "SALES"]
+        },
+        {
+            label: "Campaign Plans",
+            href: "/dashboard/sales/plans",
+            icon: ClipboardList,
+            active: pathname.includes("/dashboard/sales/plans"),
             roles: ["ADMIN", "SALES"]
         },
         {

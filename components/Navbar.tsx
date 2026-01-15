@@ -12,6 +12,7 @@ export default function Navbar() {
     const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -31,7 +32,16 @@ export default function Navbar() {
     const navLinks = [
         { name: "HOME", path: "/" },
         { name: "PETROLPUMP MEDIA", path: "/petrolpump-media" },
-        { name: "SERVICES", path: "/services" }, // Updated path
+        {
+            name: "SERVICES",
+            path: "/services",
+            children: [
+                { name: "FUEL STATION MEDIA", path: "/services/fuel-station-media", separator: true },
+                { name: "BTL/ATL", path: "/services/btl-atl" },
+                { name: "DISPLAY SPACE", path: "/services/display-space" },
+                { name: "BRANDINGS", path: "/services/brandings" },
+            ]
+        },
         { name: "CASE STUDY", path: "/case-study" },
         { name: "BLOG", path: "/blog" },
     ];
@@ -39,8 +49,8 @@ export default function Navbar() {
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/10 ${scrolled
-                    ? "bg-[#002147]/90 backdrop-blur-md shadow-md py-2"
-                    : "bg-[#002147] py-4"
+                ? "bg-[#002147]/90 backdrop-blur-md shadow-md py-2"
+                : "bg-[#002147] py-4"
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,14 +74,36 @@ export default function Navbar() {
                     {/* Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-8">
                         {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                href={link.path}
-                                className={`text-sm font-medium transition-colors hover:text-blue-300 ${isActive(link.path) ? "text-white font-bold" : "text-gray-300"
-                                    }`}
-                            >
-                                {link.name}
-                            </Link>
+                            <div key={link.name} className="relative group">
+                                <Link
+                                    href={link.path}
+                                    className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-blue-300 ${isActive(link.path) ? "text-white font-bold" : "text-gray-300"
+                                        }`}
+                                >
+                                    {link.name}
+                                    {link.children && (
+                                        <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                                    )}
+                                </Link>
+
+                                {/* Dropdown Menu */}
+                                {link.children && (
+                                    <div className="absolute left-0 pt-2 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 ease-in-out transform group-hover:translate-y-0 translate-y-2">
+                                        <div className="bg-[#002147] border border-white/10 rounded-md shadow-xl py-2">
+                                            {link.children.map((child) => (
+                                                <Link
+                                                    key={child.name}
+                                                    href={child.path}
+                                                    className={`block px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors ${child.separator ? "border-b border-white/20 mb-1" : ""
+                                                        }`}
+                                                >
+                                                    {child.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
 
@@ -103,18 +135,47 @@ export default function Navbar() {
 
             {/* Mobile Menu Dropdown */}
             {mobileMenuOpen && (
-                <div className="md:hidden bg-[#002147] border-t border-white/10 absolute w-full left-0 animate-fade-in-up shadow-xl">
+                <div className="md:hidden bg-[#002147] border-t border-white/10 absolute w-full left-0 animate-fade-in-up shadow-xl h-screen overflow-y-auto pb-20">
                     <div className="px-4 pt-2 pb-6 space-y-4 flex flex-col items-center">
                         {navLinks.map((link) => (
-                            <Link
-                                key={link.name}
-                                href={link.path}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className={`text-base font-medium py-2 ${isActive(link.path) ? "text-white" : "text-gray-400"
-                                    }`}
-                            >
-                                {link.name}
-                            </Link>
+                            <div key={link.name} className="w-full flex flex-col items-center">
+                                {link.children ? (
+                                    <>
+                                        <button
+                                            onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                                            className={`flex items-center gap-2 text-base font-medium py-2 ${isActive(link.path) || mobileServicesOpen ? "text-white" : "text-gray-400"}`}
+                                        >
+                                            {link.name}
+                                            <ChevronDown className={`w-4 h-4 transition-transform ${mobileServicesOpen ? "rotate-180" : ""}`} />
+                                        </button>
+
+                                        {/* Mobile Submenu */}
+                                        {mobileServicesOpen && (
+                                            <div className="w-full flex flex-col items-center bg-[#00152e] rounded-md py-2 mt-1 space-y-2">
+                                                {link.children.map((child) => (
+                                                    <Link
+                                                        key={child.name}
+                                                        href={child.path}
+                                                        onClick={() => setMobileMenuOpen(false)}
+                                                        className={`text-sm text-gray-400 hover:text-white py-1.5 ${child.separator ? "font-bold text-white border-b border-white/10 w-3/4 text-center mb-1" : ""}`}
+                                                    >
+                                                        {child.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <Link
+                                        href={link.path}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className={`text-base font-medium py-2 ${isActive(link.path) ? "text-white" : "text-gray-400"
+                                            }`}
+                                    >
+                                        {link.name}
+                                    </Link>
+                                )}
+                            </div>
                         ))}
                         <div className="h-px w-full bg-white/10 my-2"></div>
                         <UserMenu mobile />

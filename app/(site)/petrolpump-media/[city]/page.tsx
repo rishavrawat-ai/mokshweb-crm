@@ -21,6 +21,28 @@ export default async function CityMediaPage({ params }: { params: { city: string
                 { city: cityName.toLowerCase() }
             ]
         },
+        select: {
+            id: true,
+            outletName: true,
+            name: true,
+            locationName: true,
+            location: true,
+            state: true, // Fix missing field
+            district: true,
+            city: true,
+            hoardingsCount: true,
+            width: true,
+            widthFt: true,
+            height: true,
+            heightFt: true,
+            totalArea: true,
+            areaSqft: true,
+            rate: true,
+            ratePerSqft: true,
+            printingCharge: true,
+            netTotal: true,
+            computedNetTotal: true
+        },
         orderBy: { location: 'asc' }
     })
 
@@ -59,7 +81,22 @@ export default async function CityMediaPage({ params }: { params: { city: string
                 <CityHoardingTable hoardings={cityHoardings.map(h => ({
                     ...h,
                     location: h.location ?? (h as any).locationName ?? "",
-                    city: h.city ?? ""
+                    city: h.city ?? "",
+                    state: (h as any).state ?? "",
+                    // Map outletName to name if name is missing
+                    name: h.name ?? (h as any).outletName ?? "N/A",
+                    // Fix serialization for Decimal types
+                    width: h.width ? Number(h.width) : null,
+                    height: h.height ? Number(h.height) : null,
+                    totalArea: h.totalArea ? Number(h.totalArea) : null,
+                    widthFt: h.widthFt ? Number(h.widthFt) : null,
+                    heightFt: h.heightFt ? Number(h.heightFt) : null,
+                    areaSqft: h.areaSqft ? Number(h.areaSqft) : null,
+                    rate: h.rate ? Number(h.rate) : null,
+                    ratePerSqft: h.ratePerSqft ? Number(h.ratePerSqft) : null,
+                    printingCharge: h.printingCharge ? Number(h.printingCharge) : null,
+                    netTotal: h.netTotal ? Number(h.netTotal) : null,
+                    computedNetTotal: h.computedNetTotal ? Number(h.computedNetTotal) : null,
                 }))} />
             </div>
         </main>
